@@ -31,7 +31,20 @@ public:
    */
   void ProcessMeasurement(MeasurementPackage meas_package);
 
+  // Returns percent of underestimated noise points.
+  double getUnderEstimatedFrequency() const;
+
 private:
+  using NormalizerFn = void (*)(VectorXd*);
+
+  MatrixXd BuildSigmaPointsAugmentedState() const;
+  VectorXd PredictStateChange(const VectorXd& x_aug,
+                              double delta_t,
+                              double delta_t_2) const;
+
+  MatrixXd PredictRadarMeasurement() const;
+  MatrixXd PredictLidarMeasurement() const;
+
   /**
    * Prediction Predicts sigma points, the state, and the state covariance
    * matrix
@@ -51,6 +64,14 @@ private:
    */
   void UpdateRadar(MeasurementPackage meas_package);
 
+  /**
+   * Implements common logic of the Update step.
+   * Returns NIS value.
+   */
+  double UpdateState(const MeasurementPackage& meas_package,
+                     const MatrixXd& Zsig,
+                     const MatrixXd& MeasurementNoise,
+                     NormalizerFn normalize);
 
   ///* initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -60,6 +81,9 @@ private:
 
   ///* if this is false, radar measurements will be ignored (except for init)
   bool use_radar_;
+
+  ///* process noise matrix
+  MatrixXd Q_;
 
   ///* state covariance matrix
   MatrixXd P_;
@@ -108,6 +132,9 @@ private:
 
   MatrixXd R_radar_;
   MatrixXd R_lidar_;
+
+  unsigned long measurements_nr_ = 0;
+  unsigned long under_estimated_nr_ = 0;
 };
 
 #endif /* UKF_H */

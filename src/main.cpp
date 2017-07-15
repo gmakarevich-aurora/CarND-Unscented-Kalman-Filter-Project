@@ -108,6 +108,10 @@ int main()
           //Call ProcessMeasurment(meas_package) for Kalman filter
     	  ukf.ProcessMeasurement(meas_package);    	  
 
+    	  // Print out the stats on the frequency of noise underestimation.
+    	  // std::cout << "Underestimated: "
+    	  //           << ukf.getUnderEstimatedFrequency() << std::endl;
+
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
 
     	  VectorXd estimate(4);
